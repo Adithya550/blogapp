@@ -4,24 +4,32 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const Add = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   
-  const [inputs, setInputs] = useState({
-    title: location.state?.title || "",
-    content: location.state?.content || "",
-    img_url: location.state?.img_url || "",
+  const location = useLocation();
+console.log(location.state)
+  const navigate = useNavigate();
+  var [inputs, setInputs] = useState({
+    title: "",
+    content: "",
+    img_url: "",
   });
+  
+  useEffect(()=>{
+    if(location.state != null){
+      setInputs({...inputs,title: location.state.value.title, content:location.state.value.content, img_url : location.state.value.img_url})
+    }
+  },[])
 
   const inputHandler = (e) => {
+    console.log(e.target.value);
     setInputs({ ...inputs, [e.target.name]: e.target.value });
+    console.log("in",inputs);
   };
-
   const addData = () => {
-    const apiUrl = location.state ? `http://localhost:3001/update/${location.state.id}` : "http://localhost:3001/add";
-    
-    axios
-      .post(apiUrl, inputs)
+    console.log("clicked");
+    if(location.state!=null){
+      axios
+      .put(`http://localhost:3001/update/${location.state.value._id}`,inputs)
       .then((res) => {
         alert(res.data.message);
         navigate("/");
@@ -29,59 +37,69 @@ const Add = () => {
       .catch((err) => {
         console.log(err);
       });
+    }else{
+      axios
+      .post("http://localhost:3001/add",inputs)
+      .then((res) => {
+        alert(res.data.message);
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    }
   };
-
   return (
     <div>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "90vh",
-        }}
-      >
+      <div>
         <Box
-          component="form"
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 2,
-            width: "600px",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "90vh",
           }}
         >
-          <TextField
-            variant="outlined"
-            placeholder="Title"
-            onChange={inputHandler}
-            name="title"
-            value={inputs.title}
-            fullWidth
-          />
-          <TextField
-            variant="outlined"
-            placeholder="Content"
-            onChange={inputHandler}
-            name="content"
-            value={inputs.content}
-            multiline
-            rows={4}
-            fullWidth
-          />
-          <TextField
-            variant="outlined"
-            placeholder="Image URL"
-            onChange={inputHandler}
-            name="img_url"
-            value={inputs.img_url}
-            fullWidth
-          />
-          <Button variant="contained" color="secondary" onClick={addData}>
-            {location.state ? "Update" : "Submit"}
-          </Button>
+          <Box
+            component="form"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              width: "600px",
+            }}
+          >
+            <TextField
+              variant="outlined"
+              placeholder="Title"
+              onChange={inputHandler}
+              name="title"
+              value={inputs.title}
+              fullWidth
+            />
+            <TextField
+              variant="outlined"
+              placeholder="content"
+              onChange={inputHandler}
+              name="content"
+              value={inputs.content}
+              multiline={4}
+            />
+            <TextField
+              variant="outlined"
+              placeholder="image url"
+              onChange={inputHandler}
+              name="img_url"
+              value={inputs.img_url}
+            />
+
+            <Button variant="contained" color="secondary" onClick={addData}>
+              Submit
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      </div>
     </div>
   );
 };
